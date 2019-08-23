@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:11
+    restart: always
+    volumes:
+      - ./etc/postgres/:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_MULTIPLE_DATABASES: "users, users_test"
+      POSTGRES_USER: "postgres"
+    ports:
+      - 5432:5432
+
+  users:
+    build: .
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
+    restart: on-failure
+    environment:
+      POSTGRESQL_HOST: "postgres"
+      POSTGRESQL_PORT: "5432"
+      POSTGRESQL_DATABASE: "users"
+      POSTGRESQL_USERNAME: "postgres"
