@@ -1,0 +1,3 @@
+[submodule "submodules/m-proto"]
+	path = submodules/m-proto
+	url = git@github.com:bugscatcher/m-proto.git

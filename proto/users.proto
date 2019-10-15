@@ -1,0 +1,26 @@
+syntax = "proto3";
+package mpackage;
+
+option java_package = "com.github.bugscatcher";
+option java_outer_classname = "UsersProtos";
+option go_package = "services";
+
+service UsersService {
+    rpc GetUsers (QueryUsers) returns (ResultUsers);
+}
+
+message QueryUsers {
+    string search = 1;
+}
+
+message ResultUsers {
+    repeated User users = 1;
+}
+
+message User {
+    string id = 1;
+    string first_name = 2;
+    string last_name = 3;
+    string phone_number = 4;
+    string username = 5;
+}
