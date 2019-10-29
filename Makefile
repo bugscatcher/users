@@ -6,7 +6,7 @@ build_server:
 	CGO_ENABLED=0 go build -o users
 
 build_common_migrations:
-	CGO_ENABLED=0 go build -o migrate_common ./migrations/common/*.go
+	CGO_ENABLED=0 go build -o migrate_common ./migration/common/*.go
 
 compose_create_test_db:
 	 docker-compose exec postgres createdb -U postgres users_test
