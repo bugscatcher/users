@@ -13,3 +13,4 @@
 
 /vendor/*
 .idea/*
+migrate_common
