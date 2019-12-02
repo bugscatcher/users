@@ -9,8 +9,8 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func (G *GRPCHandler) GetUsers(ctx context.Context, q *services.QueryUsers) (*services.ResultUsers, error) {
-	users, err := findUser(G.db, q)
+func (h *Handler) GetUsers(ctx context.Context, q *services.QueryUsers) (*services.ResultUsers, error) {
+	users, err := findUser(h.db, q)
 	if err != nil {
 		return &services.ResultUsers{}, err
 	}
@@ -41,7 +41,7 @@ func findUser(pool *pgx.ConnPool, q *services.QueryUsers) ([]*model.User, error)
 		FROM
 			users
 		WHERE
-			first_name ~~* '%$1%'`, q.Search)
+			first_name LIKE '%' || $1 || '%'`, q.Search)
 	if err != nil {
 		return nil, xerrors.Errorf("while selecting from users: %w", err)
 	}

@@ -4,34 +4,43 @@ import (
 	"context"
 	"github.com/bugscatcher/users/model"
 	"github.com/bugscatcher/users/services"
-	"github.com/bxcodec/faker/v3"
+	"github.com/bugscatcher/users/testutil"
 	"github.com/jackc/pgx"
 	"testing"
+	"time"
 
-	"github.com/bugscatcher/users/application"
-	"github.com/bugscatcher/users/config"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGRPCHandler_GetUsers(t *testing.T) {
-	conf, err := config.New()
-	assert.NoError(t, err)
-	app, err := application.New(&conf)
-	assert.NoError(t, err)
-	h := New(app)
-	user := &model.User{}
-	err = faker.FakeData(&user)
-	assert.NoError(t, err)
-	err = addUser(h.db, user)
+func TestHandler_GetUsers_OneUser(t *testing.T) {
+	h := newTestHandler(0)
+	user := testutil.GetRandomUser()
+	err := addUser(h.db, user)
 	assert.NoError(t, err)
 	q := &services.QueryUsers{
 		Search: user.FirstName,
 	}
-	result, err := h.GetUsers(context.Background(), q)
+	result, err := h.service.GetUsers(context.Background(), q)
 	assert.NoError(t, err)
-	expectedResult := &services.ResultUsers{
-		Users: []*services.User{toGRPCUser(user)},
+	expectedResult := &services.ResultUsers{Users: model.ToUsers(user)}
+	assert.EqualValues(t, expectedResult, result)
+}
+
+func TestHandler_GetUsers_MultipleUsers(t *testing.T) {
+	h := newTestHandler(0)
+	users := testutil.GetRandomUsers(5)
+	suffix := time.Now().String()
+	for _, user := range users {
+
 	}
+	err := addUsers(h.db, users...)
+	assert.NoError(t, err)
+	q := &services.QueryUsers{
+		Search: users[0].FirstName,
+	}
+	result, err := h.service.GetUsers(context.Background(), q)
+	assert.NoError(t, err)
+	expectedResult := &services.ResultUsers{Users: model.ToUsers(users[0])}
 	assert.EqualValues(t, expectedResult, result)
 }
 
@@ -42,12 +51,11 @@ func addUser(pool *pgx.ConnPool, user *model.User) error {
 	return err
 }
 
-func toGRPCUser(user *model.User) *services.User {
-	return &services.User{
-		Id:          user.ID.String(),
-		FirstName:   user.FirstName,
-		LastName:    user.LastName,
-		PhoneNumber: user.PhoneNumber,
-		Username:    user.Username,
-	}
+func addUsers(pool *pgx.ConnPool, user ...*model.User) error {
+	_, err := pool.CopyFrom(
+		pgx.Identifier{"users"},
+		[]string{"id", "first_name", "last_name", "username"},
+		pgx.CopyFromRows(model.GetValues(user...)),
+	)
+	return err
 }
