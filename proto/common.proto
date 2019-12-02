@@ -1,0 +1,15 @@
+syntax = "proto3";
+package common;
+
+option java_package = "com.github.bugscatcher";
+option java_outer_classname = "CommonProtos";
+option go_package = "services";
+
+message Response {
+    Status status = 1;
+}
+
+enum Status {
+    OK = 0;
+    INVALID_ARGUMENT = 3;
+}
