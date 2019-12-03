@@ -6,13 +6,13 @@ import (
 	"github.com/jackc/pgx"
 )
 
-type GRPCHandler struct {
+type Handler struct {
 	db            *pgx.ConnPool
 	kafkaProducer sarama.SyncProducer
 }
 
-func New(app *application.App) *GRPCHandler {
-	return &GRPCHandler{
+func New(app *application.App) *Handler {
+	return &Handler{
 		db:            app.DB,
 		kafkaProducer: app.KafkaProducer,
 	}

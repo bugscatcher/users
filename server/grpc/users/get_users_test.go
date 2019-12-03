@@ -2,52 +2,105 @@ package users
 
 import (
 	"context"
-	"github.com/bugscatcher/users/model"
-	"github.com/bugscatcher/users/services"
-	"github.com/bxcodec/faker/v3"
-	"github.com/jackc/pgx"
 	"testing"
 
-	"github.com/bugscatcher/users/application"
-	"github.com/bugscatcher/users/config"
+	"github.com/bugscatcher/users/model"
+	"github.com/bugscatcher/users/services"
+	"github.com/bugscatcher/users/testutil"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGRPCHandler_GetUsers(t *testing.T) {
-	conf, err := config.New()
+func TestHandler_GetUsers_OneUser(t *testing.T) {
+	h := newTestHandler(0)
+	user := testutil.GetRandomUser()
+	err := addUsers(h.db, user)
 	assert.NoError(t, err)
-	app, err := application.New(&conf)
+	req := &services.RequestGetUsers{Id: []string{user.ID.String()}}
+	result, err := h.service.GetUsers(context.Background(), req)
 	assert.NoError(t, err)
-	h := New(app)
-	user := &model.User{}
-	err = faker.FakeData(&user)
-	assert.NoError(t, err)
-	err = addUser(h.db, user)
-	assert.NoError(t, err)
-	q := &services.QueryUsers{
-		Search: user.FirstName,
-	}
-	result, err := h.GetUsers(context.Background(), q)
-	assert.NoError(t, err)
-	expectedResult := &services.ResultUsers{
-		Users: []*services.User{toGRPCUser(user)},
-	}
+	expectedResult := &services.ResultUsers{Users: model.ToUsers(user)}
 	assert.EqualValues(t, expectedResult, result)
 }
 
-func addUser(pool *pgx.ConnPool, user *model.User) error {
-	_, err := pool.Exec(`
-		INSERT INTO users (id, first_name, last_name, username)
-		VALUES($1, $2, $3, $4)`, user.ID, user.FirstName, user.LastName, user.Username)
-	return err
+func TestHandler_GetUsers_MultipleUsers(t *testing.T) {
+	h := newTestHandler(0)
+	users := testutil.GetRandomUsers(5)
+	err := addUsers(h.db, users...)
+	assert.NoError(t, err)
+	req := &services.RequestGetUsers{
+		Id: []string{
+			users[0].ID.String(),
+			users[1].ID.String(),
+			users[2].ID.String(),
+		},
+	}
+	result, err := h.service.GetUsers(context.Background(), req)
+	assert.NoError(t, err)
+	expectedResult := &services.ResultUsers{Users: model.ToUsers(users[0:3]...)}
+	assert.EqualValues(t, expectedResult, result)
 }
 
-func toGRPCUser(user *model.User) *services.User {
-	return &services.User{
-		Id:          user.ID.String(),
-		FirstName:   user.FirstName,
-		LastName:    user.LastName,
-		PhoneNumber: user.PhoneNumber,
-		Username:    user.Username,
+func TestHandler_GetUsers_NegativeCases(t *testing.T) {
+	tests := []struct {
+		name string
+		req  *services.RequestGetUsers
+	}{
+		{
+			"empty request",
+			&services.RequestGetUsers{},
+		},
+		{
+			"empty ids",
+			&services.RequestGetUsers{
+				Id: []string{},
+			},
+		},
+		{
+			"id isn't uuid",
+			&services.RequestGetUsers{
+				Id: []string{"string"},
+			},
+		},
 	}
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			h := newTestHandler(0)
+			result, err := h.service.GetUsers(context.Background(), tc.req)
+			assert.Error(t, err)
+			assert.Nil(t, result)
+		})
+	}
+}
+
+func TestHandler_GetUsers_MultipleUsers_ExistentAndNonExistent(t *testing.T) {
+	h := newTestHandler(0)
+	users := testutil.GetRandomUsers(5)
+	err := addUsers(h.db, users...)
+	assert.NoError(t, err)
+	nonexistentID := uuid.New()
+	req := &services.RequestGetUsers{
+		Id: []string{
+			users[0].ID.String(),
+			users[4].ID.String(),
+			users[2].ID.String(),
+			nonexistentID.String(),
+		},
+	}
+	result, err := h.service.GetUsers(context.Background(), req)
+	assert.NoError(t, err)
+	expectedUsers := model.ToUsers([]*model.User{users[0], users[4], users[2]}...)
+	assert.ElementsMatch(t, expectedUsers, result.Users)
+}
+
+func addUsers(pool *pgx.ConnPool, user ...*model.User) error {
+	_, err := pool.CopyFrom(
+		pgx.Identifier{"users"},
+		[]string{"id", "first_name", "last_name", "username"},
+		pgx.CopyFromRows(model.GetValues(user...)),
+	)
+	return err
 }
