@@ -5,33 +5,26 @@ import (
 
 	"github.com/bugscatcher/users/model"
 	"github.com/bugscatcher/users/services"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx"
 	"golang.org/x/xerrors"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
-func (h *Handler) GetUsers(ctx context.Context, q *services.QueryUsers) (*services.ResultUsers, error) {
-	users, err := findUser(h.db, q)
+func (h *Handler) GetUsers(ctx context.Context, req *services.RequestGetUsers) (*services.ResultUsers, error) {
+	if err := checkRequestGetUsers(req); err != nil {
+		return nil, err
+	}
+	users, err := findUser(h.db, req.Id)
 	if err != nil {
-		return &services.ResultUsers{}, err
+		return nil, err
 	}
-	result := make([]*services.User, 0)
-	for _, user := range users {
-		u := &services.User{
-			Id:        user.ID.String(),
-			FirstName: user.FirstName,
-			LastName:  user.LastName,
-			Username:  user.Username,
-		}
-		result = append(result, u)
-	}
-	return &services.ResultUsers{
-		Users: result,
-	}, nil
+	return &services.ResultUsers{Users: model.ToUsers(users...)}, nil
 }
 
-func findUser(pool *pgx.ConnPool, q *services.QueryUsers) ([]*model.User, error) {
+func findUser(pool *pgx.ConnPool, id []string) ([]*model.User, error) {
 	result := make([]*model.User, 0)
-	//TODO search by first_name, last_name, username
 	rows, err := pool.Query(`
 		SELECT
 			id,
@@ -41,7 +34,7 @@ func findUser(pool *pgx.ConnPool, q *services.QueryUsers) ([]*model.User, error)
 		FROM
 			users
 		WHERE
-			first_name LIKE '%' || $1 || '%'`, q.Search)
+			id = ANY($1)`, id)
 	if err != nil {
 		return nil, xerrors.Errorf("while selecting from users: %w", err)
 	}
@@ -55,4 +48,24 @@ func findUser(pool *pgx.ConnPool, q *services.QueryUsers) ([]*model.User, error)
 		result = append(result, row)
 	}
 	return result, nil
+}
+
+func checkRequestGetUsers(req *services.RequestGetUsers) error {
+	if len(req.Id) == 0 {
+		return status.Error(codes.InvalidArgument, "ID is empty")
+	}
+	for _, id := range req.Id {
+		if !isUUID(id) {
+			return status.Error(codes.InvalidArgument, "ID is isn't uuid")
+		}
+	}
+	return nil
+}
+
+func isUUID(s string) bool {
+	_, err := uuid.Parse(s)
+	if err != nil {
+		return false
+	}
+	return true
 }
