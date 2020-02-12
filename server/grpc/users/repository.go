@@ -1,19 +1,29 @@
 package users
 
 import (
+	"fmt"
+
 	"github.com/bugscatcher/users/models"
 	"github.com/jackc/pgx"
 	"golang.org/x/xerrors"
 )
 
-func update(pool *pgx.ConnPool) {
-	pool.Exec(`
+func update(pool *pgx.ConnPool, firstName, lastName, id string) error {
+	cmdTag, err := pool.Exec(`
 		UPDATE users
-		SET first_name = $1 AND last_name = $2
-		WHERE id = ""`)
+		SET first_name = $1, last_name = $2
+		WHERE id = $3
+	`, firstName, lastName, id)
+	if err != nil {
+		return err
+	}
+	if cmdTag.RowsAffected() != 1 {
+		return fmt.Errorf("no row foud to update")
+	}
+	return nil
 }
 
-func findUser(pool *pgx.ConnPool, id []string) ([]*models.User, error) {
+func findUsers(pool *pgx.ConnPool, ids ...string) ([]*models.User, error) {
 	result := make([]*models.User, 0)
 	rows, err := pool.Query(`
 		SELECT
@@ -24,7 +34,7 @@ func findUser(pool *pgx.ConnPool, id []string) ([]*models.User, error) {
 		FROM
 			users
 		WHERE
-			id = ANY($1)`, id)
+			id = ANY($1)`, ids)
 	if err != nil {
 		return nil, xerrors.Errorf("while selecting from users: %w", err)
 	}
@@ -38,4 +48,13 @@ func findUser(pool *pgx.ConnPool, id []string) ([]*models.User, error) {
 		result = append(result, row)
 	}
 	return result, nil
+}
+
+func addUsers(pool *pgx.ConnPool, user ...*models.User) error {
+	_, err := pool.CopyFrom(
+		pgx.Identifier{"users"},
+		[]string{"id", "first_name", "last_name", "username"},
+		pgx.CopyFromRows(models.GetValues(user...)),
+	)
+	return err
 }

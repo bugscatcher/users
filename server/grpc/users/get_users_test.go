@@ -8,13 +8,12 @@ import (
 	"github.com/bugscatcher/users/services"
 	"github.com/bugscatcher/users/testutil"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHandler_GetUsers_OneUser(t *testing.T) {
 	h := newTestHandler(0)
-	user := testutil.GetRandomUser()
+	user := testutil.GetRandomUser(uuid.New())
 	err := addUsers(h.db, user)
 	assert.NoError(t, err)
 	req := &services.RequestGetUsers{Id: []string{user.ID.String()}}
@@ -94,13 +93,4 @@ func TestHandler_GetUsers_MultipleUsers_ExistentAndNonExistent(t *testing.T) {
 	assert.NoError(t, err)
 	expectedUsers := models.ToUsers([]*models.User{users[0], users[4], users[2]}...)
 	assert.ElementsMatch(t, expectedUsers, result.Users)
-}
-
-func addUsers(pool *pgx.ConnPool, user ...*models.User) error {
-	_, err := pool.CopyFrom(
-		pgx.Identifier{"users"},
-		[]string{"id", "first_name", "last_name", "username"},
-		pgx.CopyFromRows(models.GetValues(user...)),
-	)
-	return err
 }

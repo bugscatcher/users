@@ -6,9 +6,9 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetRandomUser() *models.User {
+func GetRandomUser(id uuid.UUID) *models.User {
 	return &models.User{
-		ID:        uuid.New(),
+		ID:        id,
 		FirstName: faker.FirstName(),
 		LastName:  faker.LastName(),
 		Username:  faker.Username(),
@@ -18,7 +18,7 @@ func GetRandomUser() *models.User {
 func GetRandomUsers(n int) []*models.User {
 	result := make([]*models.User, 0, n)
 	for i := 0; i < n; i++ {
-		result = append(result, GetRandomUser())
+		result = append(result, GetRandomUser(uuid.New()))
 	}
 	return result
 }

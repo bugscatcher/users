@@ -14,7 +14,7 @@ func (h *Handler) GetUsers(ctx context.Context, req *services.RequestGetUsers) (
 	if err := checkRequestGetUsers(req); err != nil {
 		return nil, err
 	}
-	users, err := findUser(h.db, req.Id)
+	users, err := findUsers(h.db, req.Id...)
 	if err != nil {
 		return nil, err
 	}
