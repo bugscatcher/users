@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/bugscatcher/users/model"
+	"github.com/bugscatcher/users/models"
 	"github.com/bugscatcher/users/services"
 	"github.com/bugscatcher/users/testutil"
 	"github.com/google/uuid"
@@ -20,7 +20,7 @@ func TestHandler_GetUsers_OneUser(t *testing.T) {
 	req := &services.RequestGetUsers{Id: []string{user.ID.String()}}
 	result, err := h.service.GetUsers(context.Background(), req)
 	assert.NoError(t, err)
-	expectedResult := &services.ResultUsers{Users: model.ToUsers(user)}
+	expectedResult := &services.ResultUsers{Users: models.ToUsers(user)}
 	assert.EqualValues(t, expectedResult, result)
 }
 
@@ -38,7 +38,7 @@ func TestHandler_GetUsers_MultipleUsers(t *testing.T) {
 	}
 	result, err := h.service.GetUsers(context.Background(), req)
 	assert.NoError(t, err)
-	expectedResult := &services.ResultUsers{Users: model.ToUsers(users[0:3]...)}
+	expectedResult := &services.ResultUsers{Users: models.ToUsers(users[0:3]...)}
 	assert.EqualValues(t, expectedResult, result)
 }
 
@@ -92,15 +92,15 @@ func TestHandler_GetUsers_MultipleUsers_ExistentAndNonExistent(t *testing.T) {
 	}
 	result, err := h.service.GetUsers(context.Background(), req)
 	assert.NoError(t, err)
-	expectedUsers := model.ToUsers([]*model.User{users[0], users[4], users[2]}...)
+	expectedUsers := models.ToUsers([]*models.User{users[0], users[4], users[2]}...)
 	assert.ElementsMatch(t, expectedUsers, result.Users)
 }
 
-func addUsers(pool *pgx.ConnPool, user ...*model.User) error {
+func addUsers(pool *pgx.ConnPool, user ...*models.User) error {
 	_, err := pool.CopyFrom(
 		pgx.Identifier{"users"},
 		[]string{"id", "first_name", "last_name", "username"},
-		pgx.CopyFromRows(model.GetValues(user...)),
+		pgx.CopyFromRows(models.GetValues(user...)),
 	)
 	return err
 }
