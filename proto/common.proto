@@ -11,5 +11,6 @@ message Response {
 
 enum Status {
     OK = 0;
+    CANCELLED = 1;
     INVALID_ARGUMENT = 3;
 }
