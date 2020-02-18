@@ -58,3 +58,9 @@ func addUsers(pool *pgx.ConnPool, user ...*models.User) error {
 	)
 	return err
 }
+
+func isUsernameAvailable(pool *pgx.ConnPool, username string) (bool, error) {
+	var isAvailable bool
+	err := pool.QueryRow(`SELECT NOT EXISTS(SELECT 1 FROM users WHERE username = LOWER($1))`, username).Scan(&isAvailable)
+	return isAvailable, err
+}

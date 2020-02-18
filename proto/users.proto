@@ -10,6 +10,7 @@ option go_package = "services";
 service UsersService {
     rpc GetUsers (RequestGetUsers) returns (ResultUsers);
     rpc EditName (RequestEditName) returns (common.Response);
+    rpc CheckUsername (CheckUsernameRequest) returns (CheckUsernameResult);
 }
 
 message RequestGetUsers {
@@ -21,8 +22,19 @@ message RequestEditName {
     string last_name = 2;
 }
 
+message CheckUsernameRequest {
+    string username = 1;
+}
+
 message ResultUsers {
     repeated User users = 1;
+}
+
+message CheckUsernameResult {
+    oneof result {
+        bool is_available = 1;
+        string error = 2;
+    }
 }
 
 message User {
