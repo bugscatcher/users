@@ -69,8 +69,7 @@ func TestHandler_CheckUsername(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			req := &services.CheckUsernameRequest{Username: tc.username}
-			res, err := h.service.CheckUsername(h.ctx, req)
+			res, err := h.service.CheckUsername(h.ctx, &services.UsernameRequest{Username: tc.username})
 			assert.NoError(t, err)
 			assert.EqualValues(t, tc.expResp, res)
 			actUser, err := findUsers(h.db, h.userID.String())

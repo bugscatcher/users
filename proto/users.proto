@@ -10,7 +10,8 @@ option go_package = "services";
 service UsersService {
     rpc GetUsers (RequestGetUsers) returns (ResultUsers);
     rpc EditName (RequestEditName) returns (common.Response);
-    rpc CheckUsername (CheckUsernameRequest) returns (CheckUsernameResult);
+    rpc CheckUsername (UsernameRequest) returns (CheckUsernameResult);
+    rpc ChangeUsername (UsernameRequest) returns (common.Response);
 }
 
 message RequestGetUsers {
@@ -22,7 +23,7 @@ message RequestEditName {
     string last_name = 2;
 }
 
-message CheckUsernameRequest {
+message UsernameRequest {
     string username = 1;
 }
 
