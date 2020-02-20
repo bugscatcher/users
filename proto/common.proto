@@ -13,4 +13,5 @@ enum Status {
     OK = 0;
     CANCELLED = 1;
     INVALID_ARGUMENT = 3;
+    ALREADY_EXISTS = 6;
 }

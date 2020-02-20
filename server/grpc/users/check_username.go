@@ -7,6 +7,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/bugscatcher/users/services"
+	"github.com/jackc/pgx"
 )
 
 const (
@@ -20,14 +21,17 @@ var (
 	ErrorMessageUsernameLength = fmt.Sprintf("An username must have at least %d characters.", MinUsernameLength)
 )
 
-func (h *Handler) CheckUsername(ctx context.Context, in *services.CheckUsernameRequest) (*services.CheckUsernameResult, error) {
+func (h *Handler) CheckUsername(ctx context.Context, in *services.UsernameRequest) (*services.CheckUsernameResult, error) {
+	return checkUsername(h.db, in.Username)
+}
+
+func checkUsername(pool *pgx.ConnPool, username string) (*services.CheckUsernameResult, error) {
 	result := &services.CheckUsernameResult{}
-	reqErr := validateCheckUsernameRequest(in)
-	if reqErr != nil {
-		result.Result = reqErr
+	if err := validateUsername(username); err != nil {
+		result.Result = err
 		return result, nil
 	}
-	isAvailable, err := isUsernameAvailable(h.db, in.Username)
+	isAvailable, err := isUsernameAvailable(pool, username)
 	if err != nil {
 		return nil, err
 	}
@@ -35,10 +39,10 @@ func (h *Handler) CheckUsername(ctx context.Context, in *services.CheckUsernameR
 	return result, nil
 }
 
-func validateCheckUsernameRequest(in *services.CheckUsernameRequest) *services.CheckUsernameResult_Error {
+func validateUsername(username string) *services.CheckUsernameResult_Error {
 	result := &services.CheckUsernameResult_Error{}
 	pattern := "^[0-9].*"
-	matched, err := regexp.Match(pattern, []byte(in.Username))
+	matched, err := regexp.Match(pattern, []byte(username))
 	if err != nil {
 		result.Error = ErrorMessageRegexp
 		return result
@@ -47,12 +51,12 @@ func validateCheckUsernameRequest(in *services.CheckUsernameRequest) *services.C
 		result.Error = ErrorMessageUsernameStartWithNumber
 		return result
 	}
-	if utf8.RuneCountInString(in.Username) < MinUsernameLength {
+	if utf8.RuneCountInString(username) < MinUsernameLength {
 		result.Error = ErrorMessageUsernameLength
 		return result
 	}
 	pattern = "^[A-Za-z][A-Za-z0-9]*"
-	matched, err = regexp.Match(pattern, []byte(in.Username))
+	matched, err = regexp.Match(pattern, []byte(username))
 	if err != nil {
 		result.Error = ErrorMessageRegexp
 		return result

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/bugscatcher/users/models"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx"
 	"golang.org/x/xerrors"
 )
@@ -63,4 +64,16 @@ func isUsernameAvailable(pool *pgx.ConnPool, username string) (bool, error) {
 	var isAvailable bool
 	err := pool.QueryRow(`SELECT NOT EXISTS(SELECT 1 FROM users WHERE username = LOWER($1))`, username).Scan(&isAvailable)
 	return isAvailable, err
+}
+
+func updateUsername(pool *pgx.ConnPool, username string, id uuid.UUID) error {
+	_, err := pool.Exec(`
+		UPDATE users 
+		SET username = $1 
+		WHERE id = $2
+	`, username, id)
+	if err != nil {
+		return err
+	}
+	return nil
 }
