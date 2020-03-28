@@ -3,7 +3,7 @@ package users
 import (
 	"context"
 
-	"github.com/bugscatcher/users/headers"
+	headers "github.com/bugscatcher/go-deps"
 	"github.com/bugscatcher/users/services"
 )
 

@@ -3,9 +3,9 @@ package users
 import (
 	"context"
 
+	headers "github.com/bugscatcher/go-deps"
 	"github.com/bugscatcher/users/application"
 	"github.com/bugscatcher/users/config"
-	"github.com/bugscatcher/users/headers"
 	"github.com/bugscatcher/users/postgresql"
 	"github.com/bugscatcher/users/testutil"
 	"github.com/google/uuid"

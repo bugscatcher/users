@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/bugscatcher/users/headers"
+	headers "github.com/bugscatcher/go-deps"
 	"github.com/bugscatcher/users/models"
 	"github.com/bugscatcher/users/services"
 	"github.com/bugscatcher/users/testutil"
