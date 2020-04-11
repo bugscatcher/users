@@ -4,10 +4,10 @@ import (
 	"context"
 
 	headers "github.com/bugscatcher/go-deps"
+	testutil "github.com/bugscatcher/test-utils"
 	"github.com/bugscatcher/users/application"
 	"github.com/bugscatcher/users/config"
 	"github.com/bugscatcher/users/postgresql"
-	"github.com/bugscatcher/users/testutil"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx"
 )
