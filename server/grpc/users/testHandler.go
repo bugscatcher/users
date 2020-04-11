@@ -4,7 +4,7 @@ import (
 	"context"
 
 	headers "github.com/bugscatcher/go-deps"
-	testutil "github.com/bugscatcher/test-utils"
+	"github.com/bugscatcher/test-utils"
 	"github.com/bugscatcher/users/application"
 	"github.com/bugscatcher/users/config"
 	"github.com/bugscatcher/users/postgresql"
@@ -16,7 +16,7 @@ const testDBName = "users_test"
 
 type TestHandler struct {
 	service *Handler
-	kafka   *testutil.KafkaMock
+	kafka   *testutils.KafkaMock
 	db      *pgx.ConnPool
 	userID  uuid.UUID
 	ctx     context.Context
@@ -24,7 +24,7 @@ type TestHandler struct {
 
 func newTestHandler(expectedCallCount int) *TestHandler {
 	testApp := newTestApp()
-	kafkaMock := testutil.MockKafkaProducer(expectedCallCount)
+	kafkaMock := testutils.MockKafkaProducer(expectedCallCount)
 	testApp.KafkaProducer = kafkaMock
 	h := New(testApp)
 	userID := uuid.New()

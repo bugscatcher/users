@@ -13,8 +13,8 @@ github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24
 github.com/beorn7/perks v1.0.0/go.mod h1:KWe93zE9D1o94FZ5RNwFwVgaQK1VOXiVxmqh+CedLV8=
 github.com/bugscatcher/go-deps v1.0.1 h1:n/ctpV+IZwashN1s9uBXYWNhKZjREKlRQ1ETkZy5HL4=
 github.com/bugscatcher/go-deps v1.0.1/go.mod h1:ArtfQ9QBsaBH0t1+3sdBMtNu2dOHCUqox4pmKe28tYY=
-github.com/bugscatcher/test-utils v1.0.1 h1:lzv7xWdvh6JeP4z6782zqEvCB0dEFNA97JmLW+AsO3c=
-github.com/bugscatcher/test-utils v1.0.1/go.mod h1:cX+DCq9SOgGtEsULXgf0AJnX6ZAvE8vLaDeVNpo3y0w=
+github.com/bugscatcher/test-utils v1.0.2 h1:y5u89FBR7fbXTdlXujZNUIxP09oRTC6hDdea6AetczY=
+github.com/bugscatcher/test-utils v1.0.2/go.mod h1:cX+DCq9SOgGtEsULXgf0AJnX6ZAvE8vLaDeVNpo3y0w=
 github.com/bxcodec/faker/v3 v3.2.0 h1:L3cTa9Tptyk0jsF/R6RooDZwxwA8dDi6IWdkIu8jwKo=
 github.com/bxcodec/faker/v3 v3.2.0/go.mod h1:gF31YgnMSMKgkvl+fyEo1xuSMbEuieyqfeslGYFjneM=
 github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghfAqPWnc=
