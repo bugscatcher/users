@@ -3,8 +3,9 @@ module github.com/bugscatcher/users
 go 1.13
 
 require (
-	github.com/Shopify/sarama v1.23.1
+	github.com/Shopify/sarama v1.26.1
 	github.com/bugscatcher/go-deps v1.0.1
+	github.com/bugscatcher/test-utils v1.0.1
 	github.com/bxcodec/faker/v3 v3.2.0
 	github.com/cockroachdb/apd v1.1.0 // indirect
 	github.com/gofrs/uuid v3.2.0+incompatible // indirect
@@ -17,8 +18,7 @@ require (
 	github.com/rs/zerolog v1.15.0
 	github.com/shopspring/decimal v0.0.0-20200227202807-02e2044944cc // indirect
 	github.com/spf13/viper v1.4.0
-	github.com/stretchr/testify v1.3.0
-	golang.org/x/xerrors v0.0.0-20190717185122-a985d3407aa7
+	github.com/stretchr/testify v1.4.0
+	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
 	google.golang.org/grpc v1.24.0
-	gopkg.in/jcmturner/goidentity.v3 v3.0.0 // indirect
 )
